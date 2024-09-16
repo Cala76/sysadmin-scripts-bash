@@ -34,13 +34,16 @@
 
 
 SERVER="localhost"
-PORT="5433"
+PORT="5432"
 # Required a superuser account:
 USERNAME="postgres"
 
-PGCLUSTER="12/$SERVER:$PORT"
+# Usefull only with supported versions of Postgresql in Debian
+#PGCLUSTER=" --cluster 12/$SERVER:$PORT"
+PGCLUSTER=""
 
 # Without / at the end!
+DIR_BIN="/usr/lib/postgresql/12/bin"
 DIR_OUT="/tmp/db/bkp"
 DIR_LOG="/tmp/db/log"
 
@@ -51,7 +54,7 @@ echo "$(date +%F_%H%M%S) - Started" | tee -a $OUTPUT_LOG_FILE
 
 LOG="2>&1 | tee -a $OUTPUT_LOG_FILE"
 
-BKP_COMMAND="pg_dumpall --cluster $PGCLUSTER --database=postgres --host=$SERVER --port=$PORT --username=$USERNAME --no-password --globals-only --file=$OUTPUT_FILE $LOG"
+BKP_COMMAND="$DIR_BIN/pg_dumpall $PGCLUSTER --database=postgres --host=$SERVER --port=$PORT --username=$USERNAME --no-password --globals-only --file=$OUTPUT_FILE $LOG"
 echo "BKP_COMMAND= $BKP_COMMAND" | tee -a $OUTPUT_LOG_FILE
 
 eval $BKP_COMMAND

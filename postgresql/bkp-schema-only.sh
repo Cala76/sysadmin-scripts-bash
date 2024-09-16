@@ -35,8 +35,12 @@ PORT="5432"
 DB="test"
 USERNAME="postgres"
 
-PGCLUSTER="12/$SERVER:$PORT"
+# Usefull only with supported versions of Postgresql in Debian
+#PGCLUSTER=" --cluster 12/$SERVER:$PORT"
+PGCLUSTER=""
 
+# Without / at the end!
+DIR_BIN="/usr/lib/postgresql/12/bin"
 DIR_OUT="/tmp/db/bkp"
 DIR_LOG="/tmp/db/log"
 
@@ -48,7 +52,7 @@ echo "$(date +%F_%H%M%S) - Started" | tee -a $OUTPUT_LOG_FILE
 
 LOG="2>&1 | tee -a $OUTPUT_LOG_FILE"
 
-BKP_COMMAND="pg_dump --cluster $PGCLUSTER --verbose --dbname=$DB --host=$SERVER --port=$PORT --username=$USERNAME --no-password --format=p --create --schema-only --file=$OUTPUT_FILE_DB $LOG"
+BKP_COMMAND="$DIR_BIN/pg_dump $PGCLUSTER --verbose --dbname=$DB --host=$SERVER --port=$PORT --username=$USERNAME --no-password --format=p --create --schema-only --file=$OUTPUT_FILE_DB $LOG"
 
 echo "$(date +%F_%H%M%S) - Processing db: $DB" | tee -a $OUTPUT_LOG_FILE
 echo "BKP_COMMAND= $BKP_COMMAND" | tee -a $OUTPUT_LOG_FILE

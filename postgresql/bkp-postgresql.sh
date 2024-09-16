@@ -33,15 +33,17 @@
 #ii  postgresql-client-12                  12.19-1.pgdg120+1                   amd64        front-end programs for PostgreSQL 12
 #ii  postgresql-client-common              261.pgdg120+1                       all          manager for multiple PostgreSQL client versions
 
-
 SERVER="localhost"
 PORT="5432"
 DB="test"
 USERNAME="postgres"
 
-PGCLUSTER="12/$SERVER:$PORT"
+# Usefull only with supported versions of Postgresql in Debian
+#PGCLUSTER=" --cluster 12/$SERVER:$PORT"
+PGCLUSTER=""
 
 # Without / at the end!
+DIR_BIN="/usr/lib/postgresql/12/bin"
 DIR_OUT="/tmp/db/bkp"
 DIR_LOG="/tmp/db/log"
 
@@ -53,14 +55,14 @@ echo "$(date +%F_%H%M%S) - Started" | tee -a $OUTPUT_LOG_FILE
 
 LOG="2>&1 | tee -a $OUTPUT_LOG_FILE"
 
-BKP_COMMAND="pg_dump --cluster $PGCLUSTER --verbose --dbname=$DB --host=$SERVER --port=$PORT --username=$USERNAME --no-password --format=c --compress=0 --file=$OUTPUT_FILE_DB $LOG"
+BKP_COMMAND="$DIR_BIN/pg_dump $PGCLUSTER --verbose --dbname=$DB --host=$SERVER --port=$PORT --username=$USERNAME --no-password --format=c --compress=0 --file=$OUTPUT_FILE_DB $LOG"
 
 echo "$(date +%F_%H%M%S) - Processing db:" | tee -a $OUTPUT_LOG_FILE
 echo "BKP_COMMAND= $BKP_COMMAND" | tee -a $OUTPUT_LOG_FILE
 
 eval $BKP_COMMAND
 
-HEADER_DUMP_DB="pg_restore --cluster $PGCLUSTER --list $OUTPUT_FILE_DB | head -n 12 | tee -a $OUTPUT_LOG_FILE"
+HEADER_DUMP_DB="$DIR_BIN/pg_restore $PGCLUSTER --list $OUTPUT_FILE_DB | head -n 12 | tee -a $OUTPUT_LOG_FILE"
 
 
 echo "HEADER_DUMP_DB= $HEADER_DUMP_DB" | tee -a $OUTPUT_LOG_FILE

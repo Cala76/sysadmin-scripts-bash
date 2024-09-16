@@ -47,8 +47,12 @@ SERVER="localhost"
 PORT="5432"
 USERNAME="postgres"
 
-PGCLUSTER="12/$SERVER:$PORT"
+# Usefull only with supported versions of Postgresql in Debian
+#PGCLUSTER=" --cluster 12/$SERVER:$PORT"
+PGCLUSTER=""
 
+# Without / at the end!
+DIR_BIN="/usr/lib/postgresql/12/bin"
 DIR_LOG="/tmp/db/log"
 OUTPUT_LOG_FILE="$DIR_LOG/log-restore-$DB-$SERVER-$(date +%F_%H%M%S).txt"
 
@@ -57,15 +61,15 @@ LOG="2>&1 | tee -a $OUTPUT_LOG_FILE"
 echo "$(date +%F_%H%M%S) - Started" | tee -a $OUTPUT_LOG_FILE
 
 # Create DB:
-STEP1="createdb --cluster $PGCLUSTER --host=$SERVER --port=$PORT --username=$USERNAME --no-password --echo --encoding='UTF8' --lc-collate='en_US.UTF8' --lc-ctype='en_US.UTF8' --owner=$USERNAME --template=template0 $DB $LOG"
+STEP1="$DIR_BIN/createdb $PGCLUSTER --host=$SERVER --port=$PORT --username=$USERNAME --no-password --echo --encoding='UTF8' --lc-collate='en_US.UTF8' --lc-ctype='en_US.UTF8' --owner=$USERNAME --template=template0 $DB $LOG"
 echo "STEP1= $STEP1" | tee -a $OUTPUT_LOG_FILE
 
 # list restore
-STEP2="pg_restore --cluster $PGCLUSTER --list --dbname=$DB --host=$SERVER --port=$PORT --username=$USERNAME --no-password --verbose --format=c $BKP_FILE | head -n 12 $LOG"
+STEP2="$DIR_BIN/pg_restore $PGCLUSTER --list --dbname=$DB --host=$SERVER --port=$PORT --username=$USERNAME --no-password --verbose --format=c $BKP_FILE | head -n 12 $LOG"
 echo "STEP2= $STEP2" | tee -a $OUTPUT_LOG_FILE
 
 # restore
-STEP3="pg_restore --cluster $PGCLUSTER --verbose --dbname=$DB --host=$SERVER --port=$PORT --username=$USERNAME --no-password --format=c $BKP_FILE $LOG"
+STEP3="$DIR_BIN/pg_restore $PGCLUSTER --verbose --dbname=$DB --host=$SERVER --port=$PORT --username=$USERNAME --no-password --format=c $BKP_FILE $LOG"
 echo "STEP3= $STEP3" | tee -a $OUTPUT_LOG_FILE
 
 eval $STEP1 && eval $STEP2 && eval $STEP3
